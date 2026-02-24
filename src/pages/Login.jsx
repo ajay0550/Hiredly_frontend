@@ -9,39 +9,63 @@ const Login = () => {
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  try {
-    const { data } = await API.post("/auth/login", form);
+    try {
+      const { data } = await API.post("/auth/login", form);
 
-    login(data);
+      login(data);
 
-    if (data.user.role === "recruiter") {
-      navigate("/recruiter");
-    } else {
-      navigate("/jobs");
+      if (data.user.role === "recruiter") {
+        navigate("/recruiter");
+      } else {
+        navigate("/jobs");
+      }
+    } catch (error) {
+      alert(error.response?.data?.message || "Login failed");
     }
-
-  } catch (error) {
-    alert(error.response?.data?.message || "Login failed");
-  }
   };
 
   return (
-    <div>
-      <h2>Login</h2>
-      <form onSubmit={handleSubmit}>
-        <input
-          placeholder="Email"
-          onChange={(e) => setForm({ ...form, email: e.target.value })}
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          onChange={(e) => setForm({ ...form, password: e.target.value })}
-        />
-        <button type="submit">Login</button>
-      </form>
+    <div
+      className="container d-flex justify-content-center align-items-center"
+      style={{ minHeight: "80vh" }}
+    >
+      <div className="card shadow p-4" style={{ width: "400px" }}>
+        <h3 className="text-center mb-4">Login to Hiredly</h3>
+
+        <form onSubmit={handleSubmit}>
+          <div className="mb-3">
+            <input
+              type="email"
+              className="form-control"
+              placeholder="Email"
+              value={form.email}
+              onChange={(e) =>
+                setForm({ ...form, email: e.target.value })
+              }
+              required
+            />
+          </div>
+
+          <div className="mb-3">
+            <input
+              type="password"
+              className="form-control"
+              placeholder="Password"
+              value={form.password}
+              onChange={(e) =>
+                setForm({ ...form, password: e.target.value })
+              }
+              required
+            />
+          </div>
+
+          <button type="submit" className="btn btn-dark w-100">
+            Login
+          </button>
+        </form>
+      </div>
     </div>
   );
 };
