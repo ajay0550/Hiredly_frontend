@@ -13,6 +13,7 @@ import Jobs from "./pages/Jobs";
 import MyApplications from "./pages/MyApplications";
 import RecruiterDashboard from "./pages/RecruiterDashboard";
 import ProtectedRoute from "./routes/ProtectedRoute";
+import Profile from "./pages/Profile";
 
 function Layout() {
   const location = useLocation();
@@ -35,6 +36,15 @@ function Layout() {
             element={
               <ProtectedRoute role="applicant">
                 <Jobs />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <Profile />
               </ProtectedRoute>
             }
           />

@@ -40,6 +40,12 @@ const Navbar = () => {
                 </li>
 
                 <li className="nav-item">
+                  <Link to="/profile" className="nav-link">
+                    Profile
+                  </Link>
+                </li>
+
+                <li className="nav-item">
                   <Link className="nav-link" to="/my-applications">
                     My Applications
                   </Link>
@@ -63,6 +69,12 @@ const Navbar = () => {
                   <span className="nav-link text-muted">
                     {user.name}
                   </span>
+                </li>
+
+                <li className="nav-item">
+                  <Link to="/profile" className="nav-link">
+                    Profile
+                  </Link>
                 </li>
 
                 <li className="nav-item">
