@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import API from "../api/axios";
+import ApplicationsTable from "../components/applications/ApplicationsTable";
+import EmptyState from "../components/applications/EmptyState";
 
 const MyApplications = () => {
   const [applications, setApplications] = useState([]);
@@ -11,8 +13,7 @@ const MyApplications = () => {
         const { data } = await API.get("/applications/my-applications");
         setApplications(data.data);
       } catch (error) {
-        error;
-        console.error("Failed to fetch applications");
+        console.error("Failed to fetch applications", error);
       } finally {
         setLoading(false);
       }
@@ -21,58 +22,39 @@ const MyApplications = () => {
     fetchApplications();
   }, []);
 
-  if (loading)
+  // 🔄 Professional Loading UI (Bootstrap placeholder)
+  if (loading) {
     return (
-      <div className="text-center mt-5">
-        <div className="spinner-border text-dark" role="status" />
-        <p className="mt-3">Loading applications...</p>
+      <div className="container-fluid py-4 px-4">
+        <div className="card shadow-sm border-0 p-4">
+          <div className="placeholder-glow">
+            <span className="placeholder col-6 mb-3"></span>
+            <span className="placeholder col-8 mb-2"></span>
+            <span className="placeholder col-4"></span>
+          </div>
+        </div>
       </div>
     );
+  }
 
   return (
-    <div>
-      <h2 className="mb-4">My Applications</h2>
-
-      {applications.length === 0 && (
-        <div className="alert alert-info">
-          You haven’t applied to any jobs yet.
+    <div className="container-fluid py-4 px-4">
+      {/* Header Section */}
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h3 className="fw-bold mb-1">My Applications</h3>
+          <p className="text-muted mb-0">
+            Track the status of your job applications
+          </p>
         </div>
-      )}
-
-      <div className="row">
-        {applications.map((app) => (
-          <div key={app._id} className="col-md-6 col-lg-4 mb-4">
-            <div className="card shadow-sm h-100">
-              <div className="card-body d-flex flex-column">
-                <h5 className="card-title">{app.job.title}</h5>
-
-                <p className="card-text mb-2">
-                  <strong>Company:</strong> {app.job.company}
-                </p>
-
-                <p className="card-text mb-2">
-                  <strong>Location:</strong> {app.job.location}
-                </p>
-
-                <p className="mt-auto">
-                  <strong>Status:</strong>{" "}
-                  <span
-                    className={
-                      app.status === "shortlisted"
-                        ? "badge bg-success"
-                        : app.status === "rejected"
-                        ? "badge bg-danger"
-                        : "badge bg-warning text-dark"
-                    }
-                  >
-                    {app.status}
-                  </span>
-                </p>
-              </div>
-            </div>
-          </div>
-        ))}
       </div>
+
+      {/* Content Section */}
+      {applications.length === 0 ? (
+        <EmptyState />
+      ) : (
+        <ApplicationsTable applications={applications} />
+      )}
     </div>
   );
 };
