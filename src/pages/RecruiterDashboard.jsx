@@ -13,17 +13,8 @@ const RecruiterDashboard = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const jobsPerPage = 6;
 
-  const [darkMode, setDarkMode] = useState(false);
-
   const [toast, setToast] = useState(null);
-
-  const [form, setForm] = useState({
-    title: "",
-    description: "",
-    company: "",
-    location: "",
-    salary: "",
-  });
+  const [showApplicantsModal, setShowApplicantsModal] = useState(false);
 
   // ---------------- FETCH JOBS ----------------
   const fetchJobs = async () => {
@@ -35,7 +26,7 @@ const RecruiterDashboard = () => {
       );
 
       setJobs(myJobs);
-    } catch (error) {
+    } catch {
       showToast("Failed to fetch jobs", "danger");
     }
   };
@@ -44,40 +35,10 @@ const RecruiterDashboard = () => {
     if (user) fetchJobs();
   }, [user]);
 
-  // ---------------- TOAST SYSTEM ----------------
+  // ---------------- TOAST ----------------
   const showToast = (message, type = "success") => {
     setToast({ message, type });
     setTimeout(() => setToast(null), 3000);
-  };
-
-  // ---------------- FORM HANDLING ----------------
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
-  const handleCreateJob = async (e) => {
-    e.preventDefault();
-
-    try {
-      await API.post("/jobs", {
-        ...form,
-        salary: Number(form.salary),
-      });
-
-      showToast("Job created successfully!");
-
-      setForm({
-        title: "",
-        description: "",
-        company: "",
-        location: "",
-        salary: "",
-      });
-
-      fetchJobs();
-    } catch (error) {
-      showToast("Failed to create job", "danger");
-    }
   };
 
   // ---------------- FETCH APPLICANTS ----------------
@@ -86,7 +47,8 @@ const RecruiterDashboard = () => {
       const { data } = await API.get(`/applications/job/${jobId}`);
       setApplications(data.data);
       setSelectedJob(jobId);
-    } catch (error) {
+      setShowApplicantsModal(true);
+    } catch {
       showToast("Failed to fetch applicants", "danger");
     }
   };
@@ -100,7 +62,7 @@ const RecruiterDashboard = () => {
 
       showToast("Status updated!");
       fetchApplicants(selectedJob);
-    } catch (error) {
+    } catch {
       showToast("Failed to update status", "danger");
     }
   };
@@ -113,7 +75,6 @@ const RecruiterDashboard = () => {
   const indexOfLast = currentPage * jobsPerPage;
   const indexOfFirst = indexOfLast - jobsPerPage;
   const currentJobs = filteredJobs.slice(indexOfFirst, indexOfLast);
-
   const totalPages = Math.ceil(filteredJobs.length / jobsPerPage);
 
   // ---------------- STATS ----------------
@@ -127,28 +88,24 @@ const RecruiterDashboard = () => {
   ).length;
 
   return (
-    <div className={darkMode ? "bg-dark text-light min-vh-100 p-4" : ""}>
+    <div className="container-fluid py-4 px-4">
+
+      {/* HEADER */}
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2>Recruiter Dashboard</h2>
-        <button
-          className="btn btn-outline-secondary"
-          onClick={() => setDarkMode(!darkMode)}
-        >
-          Toggle Dark Mode
-        </button>
+        <h2 className="fw-bold">Recruiter Dashboard</h2>
       </div>
 
-      {/* ---------------- TOAST ---------------- */}
+      {/* TOAST */}
       {toast && (
         <div
-          className={`alert alert-${toast.type} position-fixed top-0 end-0 m-3`}
+          className={`alert alert-${toast.type} position-fixed top-0 end-0 m-3 shadow`}
           style={{ zIndex: 9999 }}
         >
           {toast.message}
         </div>
       )}
 
-      {/* ---------------- STATS CARDS ---------------- */}
+      {/* STATS */}
       <div className="row mb-4">
         <StatCard title="Total Jobs" value={totalJobs} />
         <StatCard title="Total Applicants" value={totalApplicants} />
@@ -156,25 +113,27 @@ const RecruiterDashboard = () => {
         <StatCard title="Rejected" value={rejectedCount} color="danger" />
       </div>
 
-      {/* ---------------- SEARCH ---------------- */}
-      <input
-        className="form-control mb-4"
-        placeholder="Search jobs by title..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-      />
+      {/* SEARCH */}
+      <div className="card shadow-sm border-0 p-3 mb-4">
+        <input
+          className="form-control"
+          placeholder="Search jobs by title..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+      </div>
 
-      {/* ---------------- JOB LIST ---------------- */}
+      {/* JOB LIST */}
       <div className="row">
         {currentJobs.map((job) => (
           <div key={job._id} className="col-md-6 col-lg-4 mb-4">
-            <div className="card shadow-sm h-100">
+            <div className="card shadow-sm h-100 border-0">
               <div className="card-body d-flex flex-column">
-                <h5>{job.title}</h5>
-                <p>
-                  {job.company} <br />
-                  {job.location}
+                <h5 className="fw-bold">{job.title}</h5>
+                <p className="text-muted small mb-3">
+                  {job.company} • {job.location}
                 </p>
+
                 <button
                   className="btn btn-dark mt-auto"
                   onClick={() => fetchApplicants(job._id)}
@@ -187,8 +146,8 @@ const RecruiterDashboard = () => {
         ))}
       </div>
 
-      {/* ---------------- PAGINATION ---------------- */}
-      <div className="d-flex justify-content-center">
+      {/* PAGINATION */}
+      <div className="d-flex justify-content-center mt-3">
         {[...Array(totalPages)].map((_, index) => (
           <button
             key={index}
@@ -202,63 +161,119 @@ const RecruiterDashboard = () => {
         ))}
       </div>
 
-      {/* ---------------- APPLICANTS ---------------- */}
-      {selectedJob && (
+      {/* ---------------- APPLICANTS MODAL ---------------- */}
+      {showApplicantsModal && (
         <>
-          <h4 className="mt-5 mb-3">Applicants</h4>
-          <div className="row">
-            {applications.map((app) => (
-              <div key={app._id} className="col-md-6 col-lg-4 mb-4">
-                <div className="card shadow-sm">
-                  <div className="card-body">
-                    <h6>{app.applicant.name}</h6>
-                    <p>{app.applicant.email}</p>
-                    <span
-                      className={`badge ${
-                        app.status === "shortlisted"
-                          ? "bg-success"
-                          : app.status === "rejected"
-                          ? "bg-danger"
-                          : "bg-warning text-dark"
-                      }`}
-                    >
-                      {app.status}
-                    </span>
-                    <div className="mt-3">
-                      <button
-                        className="btn btn-success btn-sm me-2"
-                        onClick={() =>
-                          updateStatus(app._id, "shortlisted")
-                        }
-                      >
-                        Shortlist
-                      </button>
-                      <button
-                        className="btn btn-danger btn-sm"
-                        onClick={() =>
-                          updateStatus(app._id, "rejected")
-                        }
-                      >
-                        Reject
-                      </button>
-                    </div>
-                  </div>
+          <div className="modal fade show d-block">
+            <div className="modal-dialog modal-lg modal-dialog-scrollable">
+              <div className="modal-content">
+
+                <div className="modal-header">
+                  <h5 className="modal-title fw-bold">Applicants</h5>
+                  <button
+                    className="btn-close"
+                    onClick={() => setShowApplicantsModal(false)}
+                  />
                 </div>
+
+                <div className="modal-body">
+
+                  {applications.length === 0 ? (
+                    <p className="text-muted">No applicants yet.</p>
+                  ) : (
+                    applications.map((app) => (
+                      <div
+                        key={app._id}
+                        className="card mb-3 border-0 shadow-sm"
+                      >
+                        <div className="card-body">
+
+                          <div className="d-flex justify-content-between align-items-center">
+                            <div>
+                              <h6 className="fw-bold mb-1">
+                                {app.applicant?.name}
+                              </h6>
+                              <p className="text-muted small mb-1">
+                                {app.applicant?.email}
+                              </p>
+                            </div>
+
+                            <span
+                              className={`badge ${
+                                app.status === "shortlisted"
+                                  ? "bg-success"
+                                  : app.status === "rejected"
+                                  ? "bg-danger"
+                                  : "bg-warning text-dark"
+                              }`}
+                            >
+                              {app.status}
+                            </span>
+                          </div>
+
+                          {/* RESUME */}
+                          {app.applicant?.resume ? (
+                            <a
+                              href={app.applicant.resume}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="d-inline-flex align-items-center gap-2 text-decoration-none mt-3 resume-link"
+                            >
+                              <span className="fw-medium">View Resume</span>
+                            </a>
+                          ) : (
+                            <span className="text-muted small d-block mt-3">
+                              No resume uploaded
+                            </span>
+                          )}
+
+                          {/* ACTION BUTTONS */}
+                          <div className="mt-3">
+                            <button
+                              className="btn btn-success btn-sm me-2"
+                              onClick={() =>
+                                updateStatus(app._id, "shortlisted")
+                              }
+                            >
+                              Shortlist
+                            </button>
+
+                            <button
+                              className="btn btn-danger btn-sm"
+                              onClick={() =>
+                                updateStatus(app._id, "rejected")
+                              }
+                            >
+                              Reject
+                            </button>
+                          </div>
+
+                        </div>
+                      </div>
+                    ))
+                  )}
+
+                </div>
+
               </div>
-            ))}
+            </div>
           </div>
+
+          <div className="modal-backdrop fade show"></div>
         </>
       )}
     </div>
   );
 };
 
-// Small reusable stat card
+// ---------------- STAT CARD ----------------
 const StatCard = ({ title, value, color }) => (
-  <div className="col-md-3">
-    <div className="card shadow-sm text-center p-3">
-      <h6>{title}</h6>
-      <h4 className={color ? `text-${color}` : ""}>{value}</h4>
+  <div className="col-md-3 mb-3">
+    <div className="card shadow-sm border-0 text-center p-3">
+      <h6 className="text-muted small text-uppercase">{title}</h6>
+      <h4 className={`fw-bold ${color ? `text-${color}` : ""}`}>
+        {value}
+      </h4>
     </div>
   </div>
 );
