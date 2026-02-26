@@ -3,48 +3,39 @@ import {
   Routes,
   Route,
   Navigate,
-  useLocation,
 } from "react-router-dom";
 
-import Navbar from "./components/Navbar";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Jobs from "./pages/Jobs";
 import MyApplications from "./pages/MyApplications";
 import RecruiterDashboard from "./pages/RecruiterDashboard";
-import ProtectedRoute from "./routes/ProtectedRoute";
 import Profile from "./pages/Profile";
 
-function Layout() {
-  const location = useLocation();
+import ProtectedRoute from "./routes/ProtectedRoute";
+import DashboardLayout from "./layouts/DashboardLayout";
 
-  // Hide navbar on auth pages
-  const hideNavbar = ["/login", "/signup"].includes(location.pathname);
-
+function App() {
   return (
-    <>
-      {!hideNavbar && <Navbar />}
+    <BrowserRouter>
+      <Routes>
 
-      <div style={{ padding: "20px" }}>
-        <Routes>
-          <Route path="/" element={<Navigate to="/login" />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
+        {/* Redirect root */}
+        <Route path="/" element={<Navigate to="/login" />} />
 
+        {/* Auth Pages (No Layout) */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+
+        {/* All Protected Pages Inside SaaS Layout */}
+        <Route element={<DashboardLayout />}>
+
+          {/* Applicant Routes */}
           <Route
             path="/jobs"
             element={
               <ProtectedRoute role="applicant">
                 <Jobs />
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="/profile"
-            element={
-              <ProtectedRoute>
-                <Profile />
               </ProtectedRoute>
             }
           />
@@ -58,6 +49,7 @@ function Layout() {
             }
           />
 
+          {/* Recruiter Route */}
           <Route
             path="/recruiter"
             element={
@@ -66,16 +58,20 @@ function Layout() {
               </ProtectedRoute>
             }
           />
-        </Routes>
-      </div>
-    </>
-  );
-}
 
-function App() {
-  return (
-    <BrowserRouter>
-      <Layout />
+          {/* Shared Route */}
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            }
+          />
+
+        </Route>
+
+      </Routes>
     </BrowserRouter>
   );
 }
