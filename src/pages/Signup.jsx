@@ -16,7 +16,7 @@ const Signup = () => {
     e.preventDefault();
 
     try {
-      await API.post("/auth/register", form);
+      await API.post("/api/auth/register", form);
 
       alert("Account created successfully!");
       navigate("/login");

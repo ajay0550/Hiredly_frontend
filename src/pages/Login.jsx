@@ -12,7 +12,7 @@ const Login = () => {
     e.preventDefault();
 
     try {
-      const { data } = await API.post("/auth/login", form);
+      const { data } = await API.post("/api/auth/login", form);
 
       login(data);
 
