@@ -46,7 +46,7 @@ const RecruiterDashboard = () => {
   // ================= FETCH DATA =================
   const fetchJobs = async () => {
     try {
-      const { data } = await API.get("/jobs");
+      const { data } = await API.get("/api/jobs");
       const myJobs = data.data.filter(
         (job) => job.createdBy._id === user._id
       );
@@ -55,7 +55,7 @@ const RecruiterDashboard = () => {
       // Fetch applications for analytics
       let allApps = [];
       for (let job of myJobs) {
-        const res = await API.get(`/applications/job/${job._id}`);
+        const res = await API.get(`/api/applications/job/${job._id}`);
         allApps = [...allApps, ...res.data.data];
       }
       setAllApplications(allApps);
@@ -82,7 +82,7 @@ const RecruiterDashboard = () => {
 
   const handleCreateJob = async () => {
     try {
-      await API.post("/jobs", {
+      await API.post("/api/jobs", {
         ...form,
         salary: Number(form.salary),
       });
@@ -107,7 +107,7 @@ const RecruiterDashboard = () => {
   // ================= FETCH APPLICANTS =================
   const fetchApplicants = async (jobId) => {
     try {
-      const { data } = await API.get(`/applications/job/${jobId}`);
+      const { data } = await API.get(`/api/applications/job/${jobId}`);
       setApplications(data.data);
       setSelectedJob(jobId);
       setShowApplicantsModal(true);
@@ -119,7 +119,7 @@ const RecruiterDashboard = () => {
   // ================= UPDATE STATUS =================
   const updateStatus = async (applicationId, status) => {
     try {
-      await API.patch(`/applications/${applicationId}/status`, { status });
+      await API.patch(`/api/applications/${applicationId}/status`, { status });
       showToast("Status updated!");
       fetchApplicants(selectedJob);
       fetchJobs();

@@ -10,7 +10,7 @@ const MyApplications = () => {
   useEffect(() => {
     const fetchApplications = async () => {
       try {
-        const { data } = await API.get("/applications/my-applications");
+        const { data } = await API.get("/api/applications/my-applications");
         setApplications(data.data);
       } catch (error) {
         console.error("Failed to fetch applications", error);

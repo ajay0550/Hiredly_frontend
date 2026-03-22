@@ -32,7 +32,7 @@ const Profile = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const { data } = await API.get("/users/profile-stats");
+        const { data } = await API.get("/api/users/profile-stats");
         setStats(data);
       } catch (error) {
         console.error("Failed to load stats", error);
@@ -47,7 +47,7 @@ const Profile = () => {
   const handleUpdate = async () => {
     try {
       setLoading(true);
-      const { data } = await API.put("/auth/update-profile", { name });
+      const { data } = await API.put("/api/auth/update-profile", { name });
       updateUser(data.data);
       setEditMode(false);
     } catch (error) {
@@ -62,7 +62,7 @@ const Profile = () => {
       setPasswordLoading(true);
       setPasswordMessage("");
 
-      const { data } = await API.put("/users/change-password", {
+      const { data } = await API.put("/api/users/change-password", {
         currentPassword,
         newPassword,
       });

@@ -9,7 +9,7 @@ const Jobs = () => {
   useEffect(() => {
     const fetchJobs = async () => {
       try {
-        const { data } = await API.get("/jobs");
+        const { data } = await API.get("/api/jobs");
         setJobs(data.data);
       } catch (error) {
         error;
@@ -24,7 +24,7 @@ const Jobs = () => {
 
   const handleApply = async (jobId) => {
     try {
-      await API.post(`/applications/${jobId}`);
+      await API.post(`/api/applications/${jobId}`);
       alert("Application submitted!");
     } catch (error) {
       alert(error.response?.data?.message || "Failed to apply");
